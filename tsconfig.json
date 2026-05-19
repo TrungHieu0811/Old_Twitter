@@ -1,9 +1,10 @@
 {
   "compilerOptions": {
-    "module": "NodeNext", // Quy định output module được sử dụng
+    "module": "NodeNext",
     "moduleResolution": "NodeNext",
     "target": "es2022",
     "outDir": "dist",
+    "rootDir": "src",
     "esModuleInterop": true,
     "allowSyntheticDefaultImports": true,
     "resolveJsonModule": true,
@@ -12,6 +13,7 @@
     "skipLibCheck": true,
     "noFallthroughCasesInSwitch": true,
     "baseUrl": ".",
+    "ignoreDeprecations": "6.0",
     "paths": {
       "~/*": ["src/*"]
     }

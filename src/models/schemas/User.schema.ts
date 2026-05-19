@@ -1,17 +1,12 @@
 import { ObjectId } from 'mongodb';
-
-enum UserVerifyStatus {
-  Unverified,
-  Verified,
-  Banned
-}
+import { UserVerifyStatus } from '~/constants/enums';
 
 interface UserType {
   _id?: ObjectId;
-  name?: string;
+  name: string;
   email: string;
   password: string;
-  date_of_birth?: Date;
+  date_of_birth: Date;
   created_at?: Date;
   updated_at?: Date;
   email_verify_token?: string;
