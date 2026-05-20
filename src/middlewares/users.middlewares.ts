@@ -2,8 +2,10 @@ import { Request, Response, NextFunction } from 'express';
 import { checkSchema, ParamSchema } from 'express-validator';
 import { JsonWebTokenError } from 'jsonwebtoken';
 import { ObjectId } from 'mongodb';
+import { UserVerifyStatus } from '~/constants/enums';
 import { HTTP_STATUS } from '~/constants/httpStatus';
 import { USERS_MESSAGE } from '~/constants/messages';
+import { REGEX_USERNAME } from '~/constants/regex';
 import { ErrorWithStatus } from '~/models/Errors';
 import { TokenPayload } from '~/models/requests/User.requests';
 import databaseService from '~/services/database.services';
@@ -107,6 +109,63 @@ const forgot_password_tokenSchema: ParamSchema = {
   }
 };
 
+const nameSchema: ParamSchema = {
+  isString: {
+    errorMessage: USERS_MESSAGE.NAME_MUST_BE_STRING
+  },
+  notEmpty: {
+    errorMessage: USERS_MESSAGE.NAME_REQUIRED
+  },
+  trim: true,
+  isLength: {
+    options: { min: 3, max: 100 },
+    errorMessage: USERS_MESSAGE.NAME_LENGTH
+  }
+};
+
+const dateOfBirthSchema: ParamSchema = {
+  isISO8601: {
+    options: { strict: true, strictSeparator: true },
+    errorMessage: USERS_MESSAGE.INVALID_DATE_OF_BIRTH
+  }
+};
+
+const imageSchema: ParamSchema = {
+  optional: true,
+  isString: {
+    errorMessage: USERS_MESSAGE.IMAGE_URL_MUST_BE_STRING
+  },
+  trim: true,
+  isLength: {
+    options: { min: 1, max: 400 },
+    errorMessage: USERS_MESSAGE.IMAGE_URL_LENGTH
+  }
+};
+
+const followedUserSchema: ParamSchema = {
+  custom: {
+    options: async (value, { req }) => {
+      if (!ObjectId.isValid(value)) {
+        throw new ErrorWithStatus({
+          message: USERS_MESSAGE.FOLLOWED_USER_ID_INVALID,
+          status: HTTP_STATUS.NOT_FOUND
+        });
+      }
+
+      const followedUser = await databaseService.users.findOne({
+        _id: new ObjectId(value)
+      });
+
+      if (!followedUser) {
+        throw new ErrorWithStatus({
+          message: USERS_MESSAGE.FOLLOWED_USER_NOT_FOUND,
+          status: HTTP_STATUS.NOT_FOUND
+        });
+      }
+    }
+  }
+};
+
 export const loginValidator = validate(
   checkSchema(
     {
@@ -147,19 +206,7 @@ export const loginValidator = validate(
 export const registerValidator = validate(
   checkSchema(
     {
-      name: {
-        isString: {
-          errorMessage: USERS_MESSAGE.NAME_MUST_BE_STRING
-        },
-        notEmpty: {
-          errorMessage: USERS_MESSAGE.NAME_REQUIRED
-        },
-        isLength: {
-          options: { min: 3, max: 100 },
-          errorMessage: USERS_MESSAGE.NAME_LENGTH
-        },
-        trim: true
-      },
+      name: nameSchema,
       email: {
         notEmpty: {
           errorMessage: USERS_MESSAGE.EMAIL_REQUIRED
@@ -181,12 +228,7 @@ export const registerValidator = validate(
       },
       password: passwordSchema,
       confirm_password: confirmPasswordSchema,
-      date_of_birth: {
-        isISO8601: {
-          options: { strict: true, strictSeparator: true },
-          errorMessage: USERS_MESSAGE.INVALID_DATE_OF_BIRTH
-        }
-      }
+      date_of_birth: dateOfBirthSchema
     },
     ['body']
   )
@@ -350,6 +392,164 @@ export const resetPasswordValidator = validate(
       password: passwordSchema,
       confirm_password: confirmPasswordSchema,
       forgot_password_token: forgot_password_tokenSchema
+    },
+    ['body']
+  )
+);
+
+export const verifiedUserValidator = (req: Request, res: Response, next: NextFunction) => {
+  const { verify_status } = req.decoded_authorization as TokenPayload;
+
+  if (verify_status !== UserVerifyStatus.Verified) {
+    return next(
+      new ErrorWithStatus({
+        message: USERS_MESSAGE.USER_NOT_VERIFIED,
+        status: HTTP_STATUS.FORBIDDEN
+      })
+    );
+  }
+
+  next();
+};
+
+export const updateMeValidator = validate(
+  checkSchema(
+    {
+      name: {
+        ...nameSchema,
+        optional: true
+        // notEmpty: undefined
+      },
+      date_of_birth: {
+        ...dateOfBirthSchema,
+        optional: true
+      },
+      bio: {
+        optional: true,
+        isString: {
+          errorMessage: USERS_MESSAGE.BIO_MUST_BE_STRING
+        },
+        trim: true,
+        isLength: {
+          options: { min: 1, max: 200 },
+          errorMessage: USERS_MESSAGE.BIO_LENGTH
+        }
+      },
+
+      location: {
+        optional: true,
+        isString: {
+          errorMessage: USERS_MESSAGE.LOCATION_MUST_BE_STRING
+        },
+        trim: true,
+        isLength: {
+          options: { min: 1, max: 100 },
+          errorMessage: USERS_MESSAGE.LOCATION_LENGTH
+        }
+      },
+      website: {
+        optional: true,
+        isString: {
+          errorMessage: USERS_MESSAGE.WEBSITE_MUST_BE_STRING
+        },
+        trim: true,
+        isLength: {
+          options: { min: 1, max: 100 },
+          errorMessage: USERS_MESSAGE.WEBSITE_LENGTH
+        }
+      },
+      username: {
+        optional: true,
+        isString: {
+          errorMessage: USERS_MESSAGE.USERNAME_MUST_BE_STRING
+        },
+        trim: true,
+        custom: {
+          options: async (value, { req }) => {
+            if (!REGEX_USERNAME.test(value)) {
+              throw new Error(USERS_MESSAGE.USERNAME_INVALID);
+            }
+            const existingUser = await databaseService.users.findOne({ username: value });
+            if (existingUser) {
+              throw new Error(USERS_MESSAGE.USERNAME_ALREADY_EXISTS);
+            }
+            return true;
+          }
+        }
+      },
+      avatar_url: imageSchema,
+      cover_photo_url: imageSchema
+    },
+    ['body']
+  )
+);
+
+export const followValidator = validate(
+  checkSchema(
+    {
+      followed_user_id: followedUserSchema
+    },
+    ['body']
+  )
+);
+
+export const unfollowValidator = validate(
+  checkSchema(
+    {
+      followed_user_id: followedUserSchema
+    },
+    ['params']
+  )
+);
+
+export const changePasswordValidator = validate(
+  checkSchema(
+    {
+      old_password: {
+        ...passwordSchema,
+        custom: {
+          options: async (value, { req }) => {
+            const { user_id } = req.decoded_authorization as TokenPayload;
+
+            const user = await databaseService.users.findOne({ _id: new ObjectId(user_id) });
+
+            if (!user) {
+              throw new ErrorWithStatus({
+                message: USERS_MESSAGE.USER_NOT_FOUND,
+                status: HTTP_STATUS.NOT_FOUND
+              });
+            }
+
+            if (user.password !== hashPassword(value)) {
+              throw new Error(USERS_MESSAGE.OLD_PASSWORD_INCORRECT);
+            }
+
+            return true;
+          }
+        }
+      },
+      new_password: {
+        ...passwordSchema,
+        custom: {
+          options: (value, { req }) => {
+            if (value === req.body.old_password) {
+              throw new Error(USERS_MESSAGE.NEW_PASSWORD_SAME_AS_OLD);
+            }
+            return true;
+          }
+        }
+      },
+      confirm_new_password: {
+        ...confirmPasswordSchema,
+        custom: {
+          options: (value, { req }) => {
+            if (value !== req.body.new_password) {
+              throw new Error(USERS_MESSAGE.PASSWORDS_DO_NOT_MATCH);
+            }
+            return true;
+          }
+        }
+      }
     },
     ['body']
   )
