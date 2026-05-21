@@ -78,5 +78,9 @@ export const USERS_MESSAGE = {
   USERNAME_ALREADY_EXISTS: 'Username already exists',
   NEW_PASSWORD_SAME_AS_OLD: 'New password must be different from the old password',
   OLD_PASSWORD_INCORRECT: 'Old password is incorrect',
-  CHANGE_PASSWORD_SUCCESS: 'Password changed successfully'
+  CHANGE_PASSWORD_SUCCESS: 'Password changed successfully',
+  GOOGLE_EMAIL_NOT_VERIFIED:
+    'Google account email is not verified. Please verify your email with Google before logging in.',
+  OAUTH_GOOGLE_REGISTRATION_SUCCESS: 'Registered with Google successfully',
+  OAUTH_GOOGLE_LOGIN_SUCCESS: 'Logged in with Google successfully'
 } as const;
