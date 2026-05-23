@@ -14,7 +14,8 @@ import {
   followController,
   unfollowController,
   changePasswordController,
-  googleOAuthController
+  googleOAuthController,
+  refreshTokenController
 } from '~/controllers/users.controllers';
 import { filterMiddleware } from '~/middlewares/common.middlewares';
 import {
@@ -40,6 +41,7 @@ const usersRouter = express.Router();
 usersRouter.post('/login', loginValidator, wrapRequestHandler(loginController));
 usersRouter.post('/register', registerValidator, wrapRequestHandler(registerController));
 usersRouter.post('/logout', accessTokenValidator, refeshTokenValidator, wrapRequestHandler(logoutController));
+usersRouter.post('/refresh-token', refeshTokenValidator, wrapRequestHandler(refreshTokenController));
 usersRouter.post('/verify-email', emailVerifyTokenValidator, wrapRequestHandler(verifyEmailController));
 usersRouter.post('/resend-verify-email', accessTokenValidator, wrapRequestHandler(resendVerifyEmailController));
 usersRouter.post('/forgot-password', forgotPasswordValidator, wrapRequestHandler(forgotPasswordController));

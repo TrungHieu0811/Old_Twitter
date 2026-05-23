@@ -209,6 +209,31 @@ class UsersService {
     };
   }
 
+  async refreshToken({
+    user_id,
+    verify_status,
+    refresh_token
+  }: {
+    user_id: string;
+    verify_status?: UserVerifyStatus;
+    refresh_token: string;
+  }) {
+    const [new_access_token, new_refresh_token] = await Promise.all([
+      this.signAccessToken({ user_id, verify_status }),
+      this.signRefreshToken({ user_id, verify_status }),
+      databaseService.refreshTokens.deleteOne({ token: refresh_token })
+    ]);
+
+    databaseService.refreshTokens.insertOne(
+      new RefreshToken({ user_id: new ObjectId(user_id), token: new_refresh_token })
+    );
+
+    return {
+      access_token: new_access_token,
+      refresh_token: new_refresh_token
+    };
+  }
+
   async verifyEmail(user_id: string) {
     const [token] = await Promise.all([
       this.signAccessTokenAndRefreshToken({ user_id, verify_status: UserVerifyStatus.Verified }),
@@ -328,13 +353,13 @@ class UsersService {
   }
 
   async follow(user_id: string, followed_user_id: string) {
-    const follower = await databaseService.flowers.findOne({
+    const follower = await databaseService.followers.findOne({
       user_id: new ObjectId(user_id),
       followed_user_id: new ObjectId(followed_user_id)
     });
 
     if (follower === null) {
-      await databaseService.flowers.insertOne(
+      await databaseService.followers.insertOne(
         new Follower({
           user_id: new ObjectId(user_id),
           followed_user_id: new ObjectId(followed_user_id)
@@ -352,7 +377,7 @@ class UsersService {
   }
 
   async unfollow(user_id: string, followed_user_id: string) {
-    const follower = await databaseService.flowers.findOne({
+    const follower = await databaseService.followers.findOne({
       user_id: new ObjectId(user_id),
       followed_user_id: new ObjectId(followed_user_id)
     });
@@ -363,7 +388,7 @@ class UsersService {
       };
     }
 
-    await databaseService.flowers.deleteOne({
+    await databaseService.followers.deleteOne({
       user_id: new ObjectId(user_id),
       followed_user_id: new ObjectId(followed_user_id)
     });

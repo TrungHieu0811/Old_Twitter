@@ -82,5 +82,8 @@ export const USERS_MESSAGE = {
   GOOGLE_EMAIL_NOT_VERIFIED:
     'Google account email is not verified. Please verify your email with Google before logging in.',
   OAUTH_GOOGLE_REGISTRATION_SUCCESS: 'Registered with Google successfully',
-  OAUTH_GOOGLE_LOGIN_SUCCESS: 'Logged in with Google successfully'
+  OAUTH_GOOGLE_LOGIN_SUCCESS: 'Logged in with Google successfully',
+  UPLOAD_SUCCESS: 'Upload image or video successfully',
+  REFRESH_TOKEN_SUCCESS: ' Token has been refreshed successfully',
+  GET_VIDEO_STATUS_SUCCESS: 'Video status retrieved successfully'
 } as const;
