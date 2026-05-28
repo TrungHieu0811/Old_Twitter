@@ -154,7 +154,7 @@ export const videoStatusController: RequestHandler = async (req: Request, res: R
   }
 
   res.json({
-    message: HTTP_STATUS.GET_VIDEO_STATUS_SUCCESS,
+    message: USERS_MESSAGE.GET_VIDEO_STATUS_SUCCESS,
     result: videoStatus
   });
   return;

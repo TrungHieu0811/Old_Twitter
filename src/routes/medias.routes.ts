@@ -4,7 +4,7 @@ import {
   uploadVideoController,
   uploadVideoHLSController,
   videoStatusController
-} from '~/controllers/medias.controller';
+} from '~/controllers/medias.controllers';
 import { accessTokenValidator, verifiedUserValidator } from '~/middlewares/users.middlewares';
 import { wrapRequestHandler } from '~/utils/handlers';
 

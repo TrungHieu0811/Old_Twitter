@@ -87,3 +87,39 @@ export const USERS_MESSAGE = {
   REFRESH_TOKEN_SUCCESS: ' Token has been refreshed successfully',
   GET_VIDEO_STATUS_SUCCESS: 'Video status retrieved successfully'
 } as const;
+
+export const TWEETS_MESSAGE = {
+  INVALID_TWEET_TYPE: 'Invalid tweet type',
+  INVALID_TWEET_AUDIENCE: 'Invalid tweet audience',
+  CONTENT_REQUIRED: 'Content is required',
+  CONTENT_MUST_BE_STRING: 'Content must be a string',
+  CONTENT_LENGTH: 'Content must be from 1 to 280 characters',
+  PARENT_ID_MUST_BE_A_VALID_ID: 'Parent ID must be a valid ID',
+  PARENT_ID_MUST_BE_NULL: 'Parent ID must be null',
+  CONTENT_MUST_BE_A_NON_EMPTY_STRING: 'Content must be a non-empty string when hashtags and mentions are empty',
+  CONTENT_MUST_BE_EMPTY_STRING: 'Content must be an empty string when hashtags and mentions are not empty',
+  HASHTAGS_MUST_BE_STRING_ARRAY: 'Hashtags must be an array of strings',
+  MENTIONS_MUST_BE_VALID_IDS: 'Mentions must be an array of valid IDs',
+  MEDIAS_MUST_BE_AN_ARRAY_OF_MEDIA_OBJECTS: 'Medias must be an array of media objects',
+  INVALID_TWEET_ID: 'Invalid tweet ID',
+  NOT_FOUND_TWEET: 'Tweet not found',
+  UNAUTHORIZED: 'You are not authorized to view this tweet',
+  TWEET_AUTHOR_NOT_FOUND: 'Tweet author not found',
+  USER_NOT_IN_TWITTER_CIRCLE: 'User is not in Twitter circle'
+} as const;
+
+export const BOOKMARKS_MESSAGE = {
+  TWEET_NOT_FOUND: 'Tweet not found',
+  BOOKMARK_SUCCESS: 'Tweet bookmarked successfully',
+  UNBOOKMARK_SUCCESS: 'Tweet unbookmarked successfully',
+  BOOKMARK_ALREADY_EXISTS: 'Bookmark already exists',
+  BOOKMARK_NOT_FOUND: 'Bookmark not found'
+} as const;
+
+export const LIKES_MESSAGE = {
+  UNLIKE_SUCCESS: 'Tweet unliked successfully',
+  LIKE_SUCCESS: 'Tweet liked successfully',
+  LIKE_ALREADY_EXISTS: 'Like already exists',
+  LIKE_NOT_FOUND: 'Like not found',
+  TWEET_NOT_FOUND: 'Tweet not found'
+} as const;
